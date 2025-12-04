@@ -1,0 +1,80 @@
+“10-X” represents any Securities and Exchange (SEC) filing that is a 10-K variant, e.g., 10-Q, 10-K/A, 10-K405, etc.[1] These annual and quarterly filings are required by any issuer with securities registered under Section 12 or subject to Section 15(d) of the SEC of the Securities Exchange Act of 1934, as amended, and subject to the periodic and current reporting requirements of Section13 or 15(d).[2]
+
+Purpose
+
+I provide two primary data sources associated with 10-X filings on the Security and Exchange Commission’s (SEC) EDGAR website. The first is labeled as the “Stage One Parse” which essentially cleans each filing document of extraneous materials and is described in detail below. Separately I provide data associated with a “Stage Two Parse”, which parses each document into tokens and tabulates various word counts. All of these data are available at https://sraf.nd.edu/data/.
+
+A substantial portion of an EDGAR text filing’s content consists of HTML code, embedded PDF’s, jpg’s and other artifacts not typically of interest. The complete filesize for some of the largest filings exceeds 400MB. To the extent your research does not require some of these artifacts, the parsing process can be made orders of magnitude more efficient by extracting these items and creating compressed versions of the filings. For example, after our Stage One Parse, the largest file is less than 5MB. These considerations are most relevant for the annual and quarterly filings of firms (annual and quarterly reports pursuant to Section13 of 15(d)), which is the focus of this process.
+
+The Process
+
+All 10-X SEC complete text document filings are downloaded for each year/quarter. As a precautionary note, the EDGAR site's files are generally reliable but I have found based on past experience that they are not wholly stable. For example, a few years back one of the master index files was corrupted and contained only a portion of the full index. Also, this past year, 110 files were missing from the fourth quarter of 2015. I try to validate the downloads using past versions of the data whenever possible to avoid some of these errors.
+
+The text version of the filings provided on the SEC server is an aggregation of all information provided in the browser-friendly files also listed on EDGAR for a specific filing. For example, IBM’s 10-K filing on 20120228 lists the core 10-K document in HTML format, ten exhibits, four jpg (graphics) files, and six XBRL files.[3]  All of these files are also contained in a single text file with the embedded HTML, XBRL, exhibits, and the ASCII-encoded graphics.[4]  In the IBM example, of the 48,253,491 characters contained in the file, only about 7.6% account for the 10‑K text including the exhibits and tables. The HTML coding accounts for about 55% of the file. The XBRL tables have a very high ratio of tags to data and account for about 33% of the text file. The remaining 27% of the file is attributable to the ASCII-encoded graphics. In many cases, ASCII-encoded pdfs, graphics, xls, or other binary files that have been encoded can account for more than 90% of the document.
+
+Because most textual analysis studies focus on the textual content of the document, the Stage One Parse creates files where all of the 10-X documents have been parsed to exclude markup tags, ASCII-encoded graphics, and tables. We exclude tables because they are usually not the focus of textual analysis. Certainly, one can imagine research where any of these excluded items might require analysis of the original filings, however, the compressed files provide a standardized and efficient way of facilitating those studies focused on text.
+
+ 
+
+3. Markup Tags
+
+All of the original markup language tags (HTML, XBRL, XML) are deleted from the original document. We insert our own markup tags within a header at the beginning of the compressed document and tags to delineate all exhibits in the document. The structure of the tagging system is as follows:
+
+The following information appears at the beginning of each file:
+
+<Header>
+
+<FileStats>
+
+    <FileName>20150209_10-K_edgar_data_1288776_0001288776-15-000008_1.txt</FileName>
+
+    <GrossFileSize>22027068</GrossFileSize>
+
+    <NetFileSize>284322</NetFileSize>
+
+    <ASCII_Embedded_Chars>5868153</ASCII_Embedded_Chars>
+
+    <HTML_Chars>5442273</HTML_Chars>
+
+    <XBRL_Chars>6857933</XBRL_Chars>
+
+    <XML_Chars>3286498</XML_Chars>
+
+    <N_Tables>97</N_Tables>
+
+    <N_Exhibits>12</N_Exhibits></FileStats>
+<SEC-Header>
+
+   … All text contained in the original SEC-Header
+
+</SEC-Header>
+
+</Header>
+ 
+
+Note that the <FileStats> data contain character counts for the size of the raw file, the post-parsing size, and character counts for the items deleted from the document.
+ 
+
+ All exhibits preceded by the original tags of “<TYPE>EX-##” are encapsulated in the parsed files as:
+
+<EX-##>
+… original text
+</Ex-##>
+ 
+4. Parsing Details
+
+Each raw text file downloaded from EDGAR is parsed using the following sequence.
+
+ 
+
+Remove ASCII-Encoded segments – All document segment <TYPE> tags of GRAPHIC, ZIP, EXCEL, JSON, and PDF are deleted from the file. ASCII-encoding is a means of converting binary-type files into standard ASCII characters to facilitate transfer across various hardware platforms. A relatively small graphic can create a substantial ASCII segment. Filings containing multiple graphics can be orders of magnitude larger than those containing only textual information.
+Remove <DIV>, <TR>, <TD>, and <FONT> tags – Although we require some HTML information for subsequent parsing, the files are so large (and processed as a single string) that, for processing efficiency, we initially simply strip out some of the formatting HTML.
+Remove all XML – all XML embedded documents are removed.
+Remove all XBRL – all characters between <XBRL …> … </XBRL> are deleted.
+Remove SEC Header/Footer – All characters from the beginning of the original file thru </SEC-HEADER> (or </IMS-HEADER> in some older documents) are deleted from the file. Note however that the header information is retained and included in the tagged items discussed in section 4.1. In addition, the footer “-----END PRIVACY-ENHANCED MESSAGE-----” appearing at the end of each document is deleted.
+Replace \&NBSP and \&#160 with a blank space.
+Replace \&AMP and \&#38 with “&”
+Remove all remaining extended character references (ISO-8859-1, see https://www.sec.gov/info/edgar/specifications/edgarfm-vol2-v59.pdf, section "5.2.2.6 Extended Character Sets within HTML Documents".
+Tag Exhibits – At this point in the parsing process all exhibits are tagged as discussed in section 3.2.
+Remove Markup Tags – remove all remaining markup tags (i.e., <…>).
+Excess linefeeds are removed.

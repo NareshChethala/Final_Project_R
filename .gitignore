@@ -1,0 +1,20 @@
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Mac
+.DS_Store
+
+# Data
+data/sec_data.sqlite
+data/*.csv
+!data/Loughran-McDonald_MasterDictionary_1993-2024.csv
+
+# Config
+config.json
+
+# Temp
+~$*
+*.log

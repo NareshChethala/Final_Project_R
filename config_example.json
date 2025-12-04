@@ -1,0 +1,4 @@
+{
+  "user_agent": "SECDataViewer/1.0 (test@example.com)",
+  "db_path": "data/sec_data.sqlite"
+}
