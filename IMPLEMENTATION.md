@@ -86,7 +86,7 @@ Ensure you have the following installed on your system:
 ### 2. Installation
 1.  **Clone the Repository**:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/NareshChethala/Final_Project_R.git
     cd Project_R
     ```
 2.  **Install R Packages**:
